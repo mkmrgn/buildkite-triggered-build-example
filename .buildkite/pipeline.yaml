@@ -1,0 +1,28 @@
+agents:
+  queue: demo
+
+steps:
+  - label: "Generating an artifact :artist:"
+    key: "generate-artifact"
+    command: "echo 'This is an artifact generated from the child build!' > child-artifact.txt"
+    artifact_paths:
+      - "child-artifact.txt"
+  
+  - label: "Grabbing artifact from parent build"
+    key: "fetch-artifact"
+    depends_on: "generate-artifact"
+    command: "buildkite-agent artifact download parent-artifact.txt . --build $BUILDKITE_TRIGGERED_FROM_BUILD_ID"
+    artifact_paths:
+      - "parent-artifact.txt"
+      
+  - label: "Annotating build :pencil2:"
+    key: "annotate-build"
+    depends_on: "fetch-artifact"
+    commands:
+      - "buildkite-agent artifact download parent-artifact.txt ."
+      - "buildkite-agent annotate --style 'info' 'The following annotation is generated from the artifact download from the parent build'"
+      - "cat parent-artifact.txt | buildkite-agent annotate --style 'success'"
+      
+  - label: "Setting meta-data for parent build :nerd_face:"
+    depends_on: "annotate-build"
+    command: "buildkite-agent meta-data set 'child-build-id' $$BUILDKITE_BUILD_ID"
