@@ -25,4 +25,4 @@ steps:
       
   - label: "Setting meta-data for parent build :nerd_face:"
     depends_on: "annotate-build"
-    command: "buildkite-agent meta-data set 'child-build-id' $$BUILDKITE_BUILD_ID"
+    command: "buildkite-agent meta-data set 'triggered_build_id' $$BUILDKITE_BUILD_ID --job $TRIGGER_JOB_ID"
